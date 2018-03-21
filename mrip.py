@@ -58,7 +58,7 @@ def download_all(songs, save_dir):
                 continue
 
             # TODO: optimize this
-            youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " lyrics"
+            youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
             album_cover_query = metadata['collectionName'] + " " + metadata['artistName'] + " album cover"
             file_name = "".join(metadata['trackName'].split())+".mp3"
 
