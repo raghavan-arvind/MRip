@@ -1,12 +1,23 @@
 import argparse
+from subprocess import check_output
 import sys, os
 from mrip_web import download_youtube, scrape_img, get_metadata
 
 DEFAULT_OUTPUT = 'output/'
+DEBUG = True
+VERBOSE = False
+
+
+# writes to stdout
+def debug(message):
+    if DEBUG: 
+        sys.stdout.write(message)
+        sys.stdout.flush()
 
 # writes to stderr
 def perror(message):
     sys.stderr.write(message)
+    sys.stderr.flush()
 
 # parses the input file into a dictionary
 def parse_input(input_file):
@@ -42,19 +53,46 @@ def download_all(songs, save_dir):
     for artist in songs:
         for song in songs[artist]:
             metadata = get_metadata(artist + " " + song)
+            if metadata == None:
+                debug(song + " - " + artist + " not found on iTunes!\n")
+                continue
 
             # TODO: optimize this
-            youtube_query = metadata['trackName'] + " " + metadata['artistName']
+            youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " lyrics"
             album_cover_query = metadata['collectionName'] + " " + metadata['artistName'] + " album cover"
-            print(youtube_query)
-            print(album_cover_query)
+            file_name = "".join(metadata['trackName'].split())+".mp3"
+
+            if file_name in os.listdir(save_dir):
+                debug("Skipping " + metadata['trackName'] + "!\n")
+                continue
+
+            file_name = save_dir+file_name
+
+            debug(metadata['trackName'] + " - " + metadata['artistName'] + "... ")
+
 
             # download mp3, albumcover
             download_youtube(youtube_query, os.path.join(os.getcwd(), save_dir))
             scrape_img(album_cover_query, os.path.join(os.getcwd(), save_dir))
 
-            sys.exit(1)
-        sys.exit(1)
+
+            # create finished mp3
+            command = ['lame', save_dir+"song.mp3", file_name, "--quiet",
+                    "--tt", metadata['trackName'],
+                    "--ta", metadata['artistName'],
+                    "--tl", metadata['collectionName'],
+                    "--ty", metadata['releaseDate'][:4],
+                    "--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount']),
+                    "--tg", metadata['primaryGenreName'],
+                    "--ti", save_dir+"img.jpg"]
+
+            output = check_output(command)
+
+            # clean up generated files
+            os.remove(save_dir+"img.jpg")
+            os.remove(save_dir+"song.mp3")
+
+            debug("done!\n")
 
 if __name__ == '__main__':
     # format command line arguments
@@ -78,12 +116,7 @@ if __name__ == '__main__':
     output_dir = args.o[0]+'/' if args.o else DEFAULT_OUTPUT
 
     # verify input/output directories
-    if (os.path.isdir(output_dir)):
-        if os.listdir(output_dir):
-            perror("ERROR: "+output_dir+
-                    " is not empty! Stash your saved results!\n")
-            sys.exit(1)
-    else:
+    if not os.path.isdir(output_dir):
         os.mkdir(output_dir)
 
     if not os.path.isfile(input_file):

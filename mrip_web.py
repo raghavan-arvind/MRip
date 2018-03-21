@@ -13,7 +13,7 @@ def get_soup(url,header):
     return BeautifulSoup(requests.get(url,headers=header).text,'html.parser')
 
 # scrapes google images for the first image, downlaods and saves it
-def scrape_img(query, save_directory, max_images=1, output='img.jpg'):
+def scrape_img(query, save_directory,  output='img.jpg'):
         image_type="Action"
 
         query= query.split()
@@ -27,15 +27,17 @@ def scrape_img(query, save_directory, max_images=1, output='img.jpg'):
         for a in soup.find_all("div",{"class":"rg_meta"}):
             link , Type =json.loads(a.text)["ou"]  ,json.loads(a.text)["ity"]
             ActualImages.append((link,Type))
-        for img, Type in ActualImages[0:max_images]:
+        for img, Type in ActualImages:
             try:
                 raw_img = urlopen(img).read()
                 f = open(os.path.join(save_directory , output), 'wb')
                 f.write(raw_img)
                 f.close()
+                break
             except Exception as e:
-                print("could not load : "+img)
-                print(e)
+                #print("could not load : "+img)
+                #print(e)
+                None
 
 # scrapes youtube for the first link, downlaods and saves it
 def scrape_vid(query, max_links=1):
