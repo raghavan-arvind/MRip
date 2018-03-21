@@ -3,7 +3,7 @@ MRip is a Python tool that downloads and formats mp3s from YouTube with iTunes m
 
 
 ## Usage
-Requires Python3 and an the folliwing command line utilities:
+Requires Python3 and an the following command line utilities:
 * lame
 * ffmpeg
 
