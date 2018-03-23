@@ -53,7 +53,7 @@ def download_all(songs, save_dir):
     for artist in songs:
         for song in songs[artist]:
             metadata = get_metadata(artist + " " + song)
-            if metadata == None:
+            if metadata == None or "collectionName" not in metadata:
                 debug(song + " - " + artist + " not found on iTunes!\n")
                 continue
 
@@ -72,25 +72,25 @@ def download_all(songs, save_dir):
 
 
             # download mp3, albumcover
-            download_youtube(youtube_query, os.path.join(os.getcwd(), save_dir))
-            scrape_img(album_cover_query, os.path.join(os.getcwd(), save_dir))
+            download_youtube(youtube_query, os.getcwd())
+            scrape_img(album_cover_query, os.getcwd())
 
 
             # create finished mp3
-            command = ['lame', save_dir+"song.mp3", file_name, "--quiet",
+            command = ['lame', ".song.mp3", file_name, "--quiet",
                     "--tt", metadata['trackName'],
                     "--ta", metadata['artistName'],
                     "--tl", metadata['collectionName'],
                     "--ty", metadata['releaseDate'][:4],
                     "--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount']),
                     "--tg", metadata['primaryGenreName'],
-                    "--ti", save_dir+"img.jpg"]
+                    "--ti", ".img.jpg"]
 
             output = check_output(command)
 
             # clean up generated files
-            os.remove(save_dir+"img.jpg")
-            os.remove(save_dir+"song.mp3")
+            os.remove(".img.jpg")
+            os.remove(".song.mp3")
 
             debug("done!\n")
 

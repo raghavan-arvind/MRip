@@ -13,7 +13,7 @@ def get_soup(url,header):
     return BeautifulSoup(requests.get(url,headers=header).text,'html.parser')
 
 # scrapes google images for the first image, downlaods and saves it
-def scrape_img(query, save_directory,  output='img.jpg'):
+def scrape_img(query, save_directory,  output='.img.jpg'):
         image_type="Action"
 
         query= query.split()
@@ -55,7 +55,7 @@ def scrape_vid(query, max_links=1):
                 return full_link
 
 # downloads youtube video into mp3
-def download_youtube(query, save_directory, output='song'):
+def download_youtube(query, save_directory, output='.song'):
     link = scrape_vid(query)
     output = os.path.join(save_directory, output)
     ydl_opts = {
