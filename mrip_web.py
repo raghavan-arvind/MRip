@@ -9,7 +9,7 @@ import json
 import youtube_dl
 
 def similar(a, b):
-    return fuzz.token_sort_ratio(a, b)
+    return fuzz.token_set_ratio(a, b)
 
 # adapted from http://stackoverflow.com/questions/20716842/python-download-images-from-google-image-search
 def get_soup(url,header):
