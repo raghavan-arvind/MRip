@@ -12,7 +12,9 @@ With the above installed, simply run,
 
 ```bash
 pip install -r requirements.txt
-python mrip.py <inputfile>
+python mrip.py -i <inputfile>
+OR
+python mrip.py -q <artist + song name>
 ```
 
 The input file must be formatted as shown below:
