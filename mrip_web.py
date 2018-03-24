@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from difflib import SequenceMatcher
 import requests
 from urllib.request import urlopen
 from urllib.parse import urljoin
@@ -7,8 +8,10 @@ import os, sys
 import json
 import youtube_dl
 
-# adapted from http://stackoverflow.com/questions/20716842/python-download-images-from-google-image-search
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
 
+# adapted from http://stackoverflow.com/questions/20716842/python-download-images-from-google-image-search
 def get_soup(url,header):
     return BeautifulSoup(requests.get(url,headers=header).text,'html.parser')
 
@@ -82,7 +85,16 @@ def get_metadata(query):
     if results['resultCount'] == 0:
         return None 
     else:
-        return results['results'][0]
+        # finds which result is most correlated to the query
+        most_likely = None
+        score = 0
+        for result in results['results']:
+            new_score = similar(query.lower(), (result['trackName'] + " " + result['artistName']).lower())
+            if  new_score > score:
+                score = new_score
+                most_likely = result
+
+        return most_likely
 
 
 if __name__ == '__main__':

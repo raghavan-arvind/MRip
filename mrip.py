@@ -49,62 +49,62 @@ def resolve_albums(songs):
         realSongs = [s for s in songs[artist] if not s.startswith("ALBUM")]
         albums = [" ".join(s.split(" ")[1:]) for s in songs[artist] if s.startswith("ALBUM")]
 
-def download_all(songs, save_dir):
-    for artist in songs:
-        for song in songs[artist]:
-            metadata = get_metadata(artist + " " + song)
-            if metadata == None or "collectionName" not in metadata:
-                debug(song + " - " + artist + " not found on iTunes!\n")
-                continue
+def download_query(itunes_query, save_dir):
+        metadata = get_metadata(itunes_query)
+        if metadata == None or "collectionName" not in metadata:
+            debug(itunes_query + " not found on iTunes!\n")
+            return
 
-            # TODO: optimize this
-            youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
-            album_cover_query = metadata['collectionName'] + " " + metadata['artistName'] + " album cover"
-            file_name = "".join(metadata['trackName'].split())+".mp3"
+        # TODO: optimize this
+        youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
+        album_cover_query = metadata['collectionName'] + " " + metadata['artistName'] + " album cover"
+        file_name = "".join(metadata['trackName'].split())+".mp3"
 
-            if file_name in os.listdir(save_dir):
-                debug("Skipping " + metadata['trackName'] + "!\n")
-                continue
+        if file_name in os.listdir(save_dir):
+            debug("Skipping " + metadata['trackName'] + "!\n")
+            return
 
-            file_name = save_dir+file_name
+        file_name = save_dir+file_name
 
-            debug(metadata['trackName'] + " - " + metadata['artistName'] + "... ")
+        debug(metadata['trackName'] + " - " + metadata['artistName'] + "... ")
 
 
-            # download mp3, albumcover
-            download_youtube(youtube_query, os.getcwd())
-            scrape_img(album_cover_query, os.getcwd())
+        # download mp3, albumcover
+        download_youtube(youtube_query, os.getcwd())
+        scrape_img(album_cover_query, os.getcwd())
 
 
-            # create finished mp3
-            command = ['lame', ".song.mp3", file_name, "--quiet",
-                    "--tt", metadata['trackName'],
-                    "--ta", metadata['artistName'],
-                    "--tl", metadata['collectionName'],
-                    "--ty", metadata['releaseDate'][:4],
-                    "--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount']),
-                    "--tg", metadata['primaryGenreName'],
-                    "--ti", ".img.jpg"]
+        # create finished mp3
+        command = ['lame', ".song.mp3", file_name, "--quiet",
+                "--tt", metadata['trackName'],
+                "--ta", metadata['artistName'],
+                "--tl", metadata['collectionName'],
+                "--ty", metadata['releaseDate'][:4],
+                "--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount']),
+                "--tg", metadata['primaryGenreName'],
+                "--ti", ".img.jpg"]
 
-            output = check_output(command)
+        output = check_output(command)
 
-            # clean up generated files
-            os.remove(".img.jpg")
-            os.remove(".song.mp3")
+        # clean up generated files
+        os.remove(".img.jpg")
+        os.remove(".song.mp3")
 
-            debug("done!\n")
+        debug("done!\n")
 
 if __name__ == '__main__':
     # format command line arguments
     parser = argparse.ArgumentParser(description='Download and format mp3 files.')
-    parser.add_argument('inputfile', type=str, nargs=1,
-            help='the input file of songs')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-q', '--query', type=str, action = "store", nargs="+",
+            help="an iTunes query to download")
+    group.add_argument('-i', '--inputfile', type=str, action = "store",
+            help="an input file with multiple songs")
     parser.add_argument('-o', metavar='output_directory', type=str, nargs=1,
             help='the output directory, output/ by default')
     args = parser.parse_args()
 
     # get input and output files/directories
-    input_file = args.inputfile[0]
     if args.o:
         if args.o[0].endswith("/"):
             output_dir = args.o[0]
@@ -115,19 +115,16 @@ if __name__ == '__main__':
         perror("WARNING: using default output directory -> "+DEFAULT_OUTPUT+"\n")
     output_dir = args.o[0]+'/' if args.o else DEFAULT_OUTPUT
 
-    # verify input/output directories
-    if not os.path.isdir(output_dir):
-        os.mkdir(output_dir)
+    if args.inputfile:
+        # parse the input file
+        artist_songs = parse_input(args.inputfile)
 
-    if not os.path.isfile(input_file):
-        perror("ERROR: "+input_file+" not found!\n")
-        sys.exit(1)
+        #resolve_albums(artist_songs)
 
-    # parse the input file
-    artist_songs = parse_input(input_file)
-    #resolve_albums(artist_songs)
-
-    # download songs
-    download_all(artist_songs, output_dir)
+        for artist in artist_songs:
+            for song in artist_songs[artist]:
+                download_query(artist + " " + song, output_dir)
+    elif args.query:
+        download_query(" ".join(args.query), output_dir)
 
     
