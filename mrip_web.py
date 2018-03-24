@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from difflib import SequenceMatcher
+from fuzzywuzzy import fuzz
 import requests
 from urllib.request import urlopen
 from urllib.parse import urljoin
@@ -9,7 +9,7 @@ import json
 import youtube_dl
 
 def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
+    return fuzz.token_sort_ratio(a, b)
 
 # adapted from http://stackoverflow.com/questions/20716842/python-download-images-from-google-image-search
 def get_soup(url,header):
