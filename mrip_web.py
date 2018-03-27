@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import imghdr
 from fuzzywuzzy import fuzz
 import requests
 from urllib.request import urlopen
@@ -36,7 +37,11 @@ def scrape_img(query, save_directory,  output='.img.jpg'):
                 f = open(os.path.join(save_directory , output), 'wb')
                 f.write(raw_img)
                 f.close()
-                break
+
+                if not imghdr.what(os.path.join(save_directory, output)) == None:
+                    break
+                else:
+                    os.remove(os.path.join(save_directory, output))
             except Exception as e:
                 #print("could not load : "+img)
                 #print(e)

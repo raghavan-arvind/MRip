@@ -29,10 +29,20 @@ Taylor Swift
 I Knew You Were Trouble
 ```
 
-For more config options, run `python mrip.py -h`.
+## Advanced Options
+An output directory may be specified with the '-o' flag. On Mac, using the '-o' flag with the following folder will automatically add the song to iTunes.
 
+``` 
+python mrip.py -o /Users/<username>/Music/iTunes/iTunes\ Media/Automatically\ Add\ to\ iTunes.localized 
+```
 
-## Future Plans
-In the future, I'd like to:
-* Add an album feature that allows entire albums to be downloaded
-* Allow users to manually select the YouTube source from a list
+Alternatively, adding the following to function to your ~/.bashrc file will allow you to add songs to iTunes simple by typing `addsong -q Ariana Grande Moonlight`. Make sure to specify the path to your MRip directory and your username.
+
+```bash
+addsong() {
+    pushd /path/to/mrip_directory/ > /dev/null;
+    python mrip.py -o /Users/<username>/Music/iTunes/iTunes\ Media/Automatically\ Add\ to\ iTunes.localized  $@;
+    popd > /dev/null;
+}
+```
+For other config options, run `python mrip.py -h`.
