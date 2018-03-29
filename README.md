@@ -40,9 +40,7 @@ Alternatively, adding the following to function to your ~/.bashrc file will allo
 
 ```bash
 addsong() {
-    pushd /path/to/mrip_directory/ > /dev/null;
-    python mrip.py -o /Users/<username>/Music/iTunes/iTunes\ Media/Automatically\ Add\ to\ iTunes.localized  $@;
-    popd > /dev/null;
+    python /path/to/mrip_dir/mrip.py -o /Users/<username>/Music/iTunes/iTunes\ Media/Automatically\ Add\ to\ iTunes.localized  $@;
 }
 ```
 For other config options, run `python mrip.py -h`.
