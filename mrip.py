@@ -49,15 +49,37 @@ def resolve_albums(songs):
         realSongs = [s for s in songs[artist] if not s.startswith("ALBUM")]
         albums = [" ".join(s.split(" ")[1:]) for s in songs[artist] if s.startswith("ALBUM")]
 
-def download_query(itunes_query, save_dir):
+def download_query(itunes_query, save_dir, fill):
         metadata = get_metadata(itunes_query)
         if metadata == None or "collectionName" not in metadata:
             debug(itunes_query + " not found on iTunes!\n")
-            return
+            if not fill:
+                return
+            else:
+                metadata = dict()
+                print("Enter manually! (Press enter for nothing) \n")
+                resp = input("Enter track name: ")
+                if resp:
+                    metadata['trackName'] = resp
+                resp = input("Enter artist name: ")
+                if resp:
+                    metadata['artistName'] = resp
+                resp = input("Enter album name: ")
+                if resp:
+                    metadata['collectionName'] = resp
+                resp = input("Enter release year: ")
+                if resp:
+                    metadata['releaseDate'] = resp
+                resp = input("Enter track number: ")
+                if resp:
+                    metadata['trackNumber'] = resp
+                resp = input("Enter genre: ")
+                if resp:
+                    metadata['primaryGenreName'] = resp
 
         # TODO: optimize this
         youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
-        album_cover_query = metadata['collectionName'] + " " + metadata['artistName'] + " album cover"
+        album_cover_query = (metadata['collectionName'] if 'collectionName' in metadata else metadata['trackName']) + " " + metadata['artistName'] + " album cover"
         file_name = "".join(metadata['trackName'].split())+".mp3"
 
         if file_name in os.listdir(save_dir):
@@ -75,14 +97,19 @@ def download_query(itunes_query, save_dir):
 
 
         # create finished mp3
-        command = ['lame', ".song.mp3", file_name, "--quiet",
-                "--tt", metadata['trackName'],
-                "--ta", metadata['artistName'],
-                "--tl", metadata['collectionName'],
-                "--ty", metadata['releaseDate'][:4],
-                "--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount']),
-                "--tg", metadata['primaryGenreName'],
-                "--ti", ".img.jpg"]
+        command = ['lame', ".song.mp3", file_name, "--quiet", "--ti", ".img.jpg"]
+        if 'trackName' in metadata:
+            command.extend(("--tt", metadata['trackName']))
+        if 'artistName' in metadata:
+            command.extend(("--ta", metadata['artistName']))
+        if 'collectionName' in metadata:
+            command.extend(("--tl", metadata['collectionName']))
+        if 'releaseDate' in metadata:
+            command.extend(("--ty", metadata['releaseDate'][:4]))
+        if 'trackNumber' in metadata:
+            command.extend(("--tn", str(metadata['trackNumber'])+"/"+str(metadata['trackCount'])))
+        if 'primaryGenreName' in metadata:
+            command.extend(("--tg", metadata['primaryGenreName']))
 
         output = check_output(command)
 
@@ -102,6 +129,9 @@ if __name__ == '__main__':
             help="an input file with multiple songs")
     parser.add_argument('-o', metavar='output_directory', type=str, nargs=1,
             help='the output directory, output/ by default')
+    parser.add_argument('-f', '--fill', dest = 'fill', action="store_true",
+            help='flag specifying whether user would like to manually fill information not on iTunes')
+    parser.set_defaults(fill=False)
     args = parser.parse_args()
 
     # get input and output files/directories
@@ -123,8 +153,8 @@ if __name__ == '__main__':
 
         for artist in artist_songs:
             for song in artist_songs[artist]:
-                download_query(artist + " " + song, output_dir)
+                download_query(artist + " " + song, output_dir, args.fill)
     elif args.query:
-        download_query(" ".join(args.query), output_dir)
+        download_query(" ".join(args.query), output_dir, args.fill)
 
     
