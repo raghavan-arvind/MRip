@@ -49,7 +49,7 @@ def resolve_albums(songs):
         realSongs = [s for s in songs[artist] if not s.startswith("ALBUM")]
         albums = [" ".join(s.split(" ")[1:]) for s in songs[artist] if s.startswith("ALBUM")]
 
-def download_query(itunes_query, save_dir, fill):
+def download_query(itunes_query, save_dir, fill, youtube_query_manual=None):
         metadata = get_metadata(itunes_query)
         if metadata == None or "collectionName" not in metadata:
             debug(itunes_query + " not found on iTunes!\n")
@@ -79,7 +79,8 @@ def download_query(itunes_query, save_dir, fill):
 
         # TODO: optimize this
         youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
-        album_cover_query = (metadata['collectionName'] if 'collectionName' in metadata else metadata['trackName']) + " " + metadata['artistName'] + " album cover"
+        youtube_query = youtube_query_manual if youtube_query_manual else youtube_query
+        album_cover_query = (metadata['collectionName'] if 'collectionName' in metadata else metadata['trackName']) + " " + metadata['artistName'] + " itunes"
         file_name = "".join(metadata['trackName'].split())+".mp3"
 
         if file_name in os.listdir(save_dir):
@@ -131,6 +132,8 @@ if __name__ == '__main__':
             help='the output directory, output/ by default')
     parser.add_argument('-f', '--fill', dest = 'fill', action="store_true",
             help='flag specifying whether user would like to manually fill information not on iTunes')
+    parser.add_argument('-y', '--youtube', dest = 'youtube', action="store", nargs='+',
+            help='specifiy exact title of youtube video')
     parser.set_defaults(fill=False)
     args = parser.parse_args()
 
@@ -153,8 +156,8 @@ if __name__ == '__main__':
 
         for artist in artist_songs:
             for song in artist_songs[artist]:
-                download_query(artist + " " + song, output_dir, args.fill)
+                download_query(artist + " " + song, output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
     elif args.query:
-        download_query(" ".join(args.query), output_dir, args.fill)
+        download_query(" ".join(args.query), output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
 
     
