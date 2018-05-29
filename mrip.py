@@ -156,8 +156,15 @@ if __name__ == '__main__':
 
         for artist in artist_songs:
             for song in artist_songs[artist]:
-                download_query(artist + " " + song, output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
+                if args.youtube:
+                    download_query(artist + " " + song, output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
+                else:
+                    download_query(artist + " " + song, output_dir, args.fill)
     elif args.query:
-        download_query(" ".join(args.query), output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
+        if args.youtube:
+            download_query(" ".join(args.query), output_dir, args.fill, youtube_query_manual=" ".join(args.youtube))
+        else:
+            download_query(" ".join(args.query), output_dir, args.fill)
+
 
     
