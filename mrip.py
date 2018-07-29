@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fill', dest = 'fill', action="store_true",
             help='flag specifying whether user would like to manually fill information not on iTunes')
     parser.add_argument('-y', '--youtube', dest = 'youtube', action="store", nargs='+',
-            help='specifiy exact title of youtube video')
+            help='specifiy url of youtube video')
     parser.set_defaults(fill=False)
     args = parser.parse_args()
 
@@ -150,8 +150,6 @@ if __name__ == '__main__':
     if args.inputfile:
         # parse the input file
         artist_songs = parse_input(args.inputfile)
-
-        #resolve_albums(artist_songs)
 
         for artist in artist_songs:
             for song in artist_songs[artist]:
