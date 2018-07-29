@@ -79,7 +79,6 @@ def download_query(itunes_query, save_dir, fill, youtube_query_manual=None):
 
         # TODO: optimize this
         youtube_query = metadata['trackName'] + " " + metadata['artistName'] + " topic lyrics"
-        youtube_query = youtube_query_manual if youtube_query_manual else youtube_query
         album_cover_query = (metadata['collectionName'] if 'collectionName' in metadata else metadata['trackName']) + " " + metadata['artistName'] + " itunes"
         file_name = "".join(metadata['trackName'].split())+".mp3"
 
@@ -93,7 +92,7 @@ def download_query(itunes_query, save_dir, fill, youtube_query_manual=None):
 
 
         # download mp3, albumcover
-        download_youtube(youtube_query, os.getcwd())
+        download_youtube(youtube_query, os.getcwd(), link=youtube_query_manual)
         scrape_img(album_cover_query, os.getcwd())
 
 

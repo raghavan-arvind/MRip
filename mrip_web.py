@@ -63,8 +63,9 @@ def scrape_vid(query, max_links=1):
                 return full_link
 
 # downloads youtube video into mp3
-def download_youtube(query, save_directory, output='.song'):
-    link = scrape_vid(query)
+def download_youtube(query, save_directory, output='.song', link=None):
+    if not link:
+        link = scrape_vid(query)
     output = os.path.join(save_directory, output)
     ydl_opts = {
         'format': 'bestaudio/best',
