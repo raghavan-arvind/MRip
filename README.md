@@ -44,3 +44,6 @@ addsong() {
 }
 ```
 For other config options, run `python mrip.py -h`.
+
+## Disclaimer
+We do not condone, and are not responsible for, any illegal or unethical use of this software.
