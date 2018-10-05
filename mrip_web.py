@@ -96,6 +96,7 @@ def get_metadata(query):
         score = 0
         for result in results['results']:
             new_score = similar(query.lower(), (result['trackName'] + " " + result['artistName']).lower())
+            new_score += 5 if "collectionName" in result else 0
             if  new_score > score:
                 score = new_score
                 most_likely = result
